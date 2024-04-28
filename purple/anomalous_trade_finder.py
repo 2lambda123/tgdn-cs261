@@ -132,8 +132,6 @@ class AnomalousTradeFinder:
 
             # Check for fat finger errors in the day's data
             self.calculate_fat_finger(volumes, deltas, ids, times, key)
-
-            current_minute = times[0]
             trade_count = 1
 
             # Keep track of index in array of hourly volume sums
@@ -327,8 +325,8 @@ class AnomalousTradeFinder:
         for key in self.prev_trades:
             # Query db for sum of yesterday's trade volumes, along with max and min trade prices
             date = (datetime.strptime(date,'%Y-%m-%d') - timedelta(days=1)).strftime('%Y-%m-%d')
-            vol_query = "SELECT SUM(size) FROM trades WHERE symbol_name=\'" + key + "\' AND analysis_date=\'" + date + "\'"
-            volume = db.engine.execute(vol_query)
+            vol_query = "SELECT SUM(size) FROM trades WHERE symbol_name=?" + " AND analysis_date=?"
+            volume = db.engine.execute(vol_query, (key, date, ))
 
             # Query that gets max price change for day
             price_query = "(SELECT MAX(price) FROM trades WHERE symbol_name=\'" + key + "\' AND analysis_date=\'" + date + "\' LIMIT 1) "
